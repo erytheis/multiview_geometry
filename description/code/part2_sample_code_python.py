@@ -6,7 +6,6 @@ from scipy.spatial.distance import cdist
 import matplotlib.cm as cm
 import copy
 
-
 def find_matching_points(image1, image2, n_levels=3, distance_threshold=300):
     """
     :param image1 and image2 must be RGB images
