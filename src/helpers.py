@@ -18,7 +18,7 @@ def plot_error_distributions(errors):
     :param errors: vector of errors calculated in ransac
     :return:
     """
-    n, bins, patches = plt.hist(x = errors, bins = 'auto', color = '#0504aa',
+    n, bins, patches = plt.hist(x = errors, bins = 20, color = '#0504aa',
                                 alpha = 0.7, rwidth = 0.85)
     maxfreq = n.max()
     plt.ylim(ymax = np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)

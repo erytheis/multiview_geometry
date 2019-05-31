@@ -3,3 +3,4 @@ scipy
 cyvlfeat
 numpy
 PIL
+seaborn
