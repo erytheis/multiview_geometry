@@ -64,11 +64,9 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         inliers = matches[inliers_idx]
 
         if speed_up and len(inliers) > num_of_accepted_points and found:
-            try:
-                sample_idx = np.random.randint(0, inliers.shape[0], sample_size)
-            except:
-                print inliers.shape[0]
-            sample = matches[inliers_idx[sample_idx]]
+            np.random.shuffle(inliers_idx)
+            sample_idx = inliers_idx[:sample_size]
+            sample = matches[sample_idx]
             found = True
         else:
             found = False
