@@ -57,16 +57,21 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         ground_truth = add_ones_column(remaining_points[:, [2, 3]])
 
         # Compare the distance
-        error = calculate_distance(keypoints, F, ground_truth, method='algebraic_distance')
+        error = calculate_distance(keypoints, F, ground_truth, method='sampson')
 
         # Filter the points within the band width
         inliers_idx = np.where(error < error_threshold)[0]
         inliers = matches[inliers_idx]
 
-        if speed_up and len(inliers) > num_of_accepted_points or found:
-            sample_idx = np.random.randint(0, inliers.shape[0], sample_size)
+        if speed_up and len(inliers) > num_of_accepted_points and found:
+            try:
+                sample_idx = np.random.randint(0, inliers.shape[0], sample_size)
+            except:
+                print inliers.shape[0]
             sample = matches[inliers_idx[sample_idx]]
             found = True
+        else:
+            found = False
 
         # Save the best model
         if len(inliers) > max_number_of_inliers:
@@ -120,12 +125,13 @@ def build_A(matches):
 
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
-    sample_size = 8
-    outlier_proportion = 0.3
-    number_of_iterations = 3 * calculate_number_of_iterations(sample_size, outlier_proportion)
-    error_threshold = 0.8
-    number_of_accepted_points = 20
+    sample_size = 10
+    use_speed_up = True
+    outlier_proportion = 0.2
+    number_of_iterations =  calculate_number_of_iterations(sample_size, outlier_proportion)
+    error_threshold = 0.1
+    number_of_accepted_points = 100
     print "Expected number of iteration = " + str(number_of_iterations)
-    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points)
+    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points, use_speed_up)
 
 # TODO 1)create experimentator class and calculate the error measure (A * F.reshape(9,1))
