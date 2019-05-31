@@ -1,10 +1,14 @@
-from PIL import Image
-import numpy as np
+import copy
+
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 from cyvlfeat import sift
 from scipy.spatial.distance import cdist
-import matplotlib.cm as cm
-import copy
+
+from src.main import RANSAC_for_fundamental_matrix
+
 
 def find_matching_points(image1, image2, n_levels=3, distance_threshold=300):
     """
@@ -41,8 +45,8 @@ def find_matching_points(image1, image2, n_levels=3, distance_threshold=300):
     return np.array(matches_1), np.array(matches_2)
 
 
-def RANSAC_for_fundamental_matrix(matches):  # this is a function that you should write
-    print('Implementation of RANSAC to to find the best fundamental matrix takes place here')
+# def RANSAC_for_fundamental_matrix(matches):  # this is a function that you should write
+#     print('Implementation of RANSAC to to find the best fundamental matrix takes place here')
 
 
 if __name__ == '__main__':
@@ -70,8 +74,8 @@ if __name__ == '__main__':
     '''
 
     I3 = np.zeros((I1.size[1], I1.size[0] * 2, 3))
-    I3[:, :I1.size[0], :] = I1;
-    I3[:, I1.size[0]:, :] = I2;
+    I3[:, :I1.size[0], :] = I1
+    I3[:, I1.size[0]:, :] = I2
     matches_to_plot[:, 2] += I2.size[0]  # add to the x-coordinate of second image
     fig, ax = plt.subplots()
     ax.set_aspect('equal')

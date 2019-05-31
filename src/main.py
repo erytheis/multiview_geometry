@@ -35,15 +35,19 @@ def fit_fundamental_matrix(matches):
     return F
 
 
-def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points):
+def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points, speed_up):
     max_number_of_inliers = 0
     F_best = 0
     best_matches = 0
+    found = False
+
     for i in range(num_of_iterations):
 
         # Pick s points from mathces
-        sample_idx = np.random.randint(0, matches.shape[0], sample_size)
-        sample = matches[sample_idx]
+        if not found:
+            sample_idx = np.random.randint(0, matches.shape[0], sample_size)
+            sample = matches[sample_idx]
+
         F = fit_fundamental_matrix(sample)
 
         # Take the remaining after sampling
@@ -53,15 +57,20 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         ground_truth = add_ones_column(remaining_points[:, [2, 3]])
 
         # Compare the distance
-        error = calculate_distance(keypoints, F, ground_truth, method = 'sampson')
+        error = calculate_distance(keypoints, F, ground_truth, method='algebraic_distance')
 
         # Filter the points within the band width
-        inlier_idx = np.where(error < error_threshold)[0]
-        inliers = matches[inlier_idx]
+        inliers_idx = np.where(error < error_threshold)[0]
+        inliers = matches[inliers_idx]
+
+        if speed_up and len(inliers) > num_of_accepted_points or found:
+            sample_idx = np.random.randint(0, inliers.shape[0], sample_size)
+            sample = matches[inliers_idx[sample_idx]]
+            found = True
 
         # Save the best model
-        if len(inlier_idx) > max_number_of_inliers:
-            max_number_of_inliers = len(inlier_idx)
+        if len(inliers) > max_number_of_inliers:
+            max_number_of_inliers = len(inliers)
             F_best = F
             best_matches = inliers
 
