@@ -4,17 +4,19 @@ import seaborn as sns
 from ransac import *
 
 
-def plot_heat_map(error_threshold_grid, final_results, number_of_accepted_points_grid, sample_size_grid):
+def plot_heat_map(error_type, error_threshold_grid, final_results, number_of_accepted_points_grid, sample_size_grid):
     for grid_pos, result in enumerate(final_results):
         plt.subplot(1, 3, grid_pos + 1)
         sns.heatmap(result,
                     vmin=np.min(final_results), vmax=np.max(final_results),
                     xticklabels=number_of_accepted_points_grid, yticklabels=np.round(error_threshold_grid, 2),
-                    linewidth=0.5)
+                    linewidth=0.5, annot=False)
         plt.xlabel("T = N accepted points")
         plt.ylabel("d = Error threshold")
 
         plt.title("Sample size = " + str(sample_size_grid[grid_pos]))
+
+    plt.suptitle(error_type + " error")
     plt.show()
 
 
@@ -60,6 +62,8 @@ class Experimentator:
                                                      number_of_accepted_points, speed_up=True)
                         if error_type == "euclidean":
                             error += calculate_distance(best_matches)
+                        elif error_type == "a_f":
+                            error += np.average(abs(build_A(best_matches) * F.flatten()))
                         else:
                             error += calculate_error_helper(best_matches, F)
 
@@ -69,7 +73,6 @@ class Experimentator:
             final_results.append(error_threshold_results)
 
         if plot:
-            plot_heat_map(error_threshold_grid, final_results, number_of_accepted_points_grid, sample_size_grid)
+            plot_heat_map(error_type, error_threshold_grid, final_results, number_of_accepted_points_grid,
+                          sample_size_grid)
         return final_results
-
-
