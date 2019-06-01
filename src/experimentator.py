@@ -4,16 +4,18 @@ import seaborn as sns
 from ransac import *
 
 
-def plot_heatmap(error_threshold_grid, error_threshold_results, i, number_of_accepted_points_grid, sample_size):
-    plt.subplot(1, 3, i)
-    sns.heatmap(error_threshold_results,
-                vmin=np.min(error_threshold_results), vmax=np.max(error_threshold_results),
-                xticklabels=number_of_accepted_points_grid, yticklabels=np.round(error_threshold_grid, 2),
-                linewidth=0.5)
-    plt.xlabel("T = N accepted points")
-    plt.ylabel("d = Error threshold")
+def plot_heat_map(error_threshold_grid, final_results, number_of_accepted_points_grid, sample_size_grid):
+    for grid_pos, result in enumerate(final_results):
+        plt.subplot(1, 3, grid_pos + 1)
+        sns.heatmap(result,
+                    vmin=np.min(final_results), vmax=np.max(final_results),
+                    xticklabels=number_of_accepted_points_grid, yticklabels=np.round(error_threshold_grid, 2),
+                    linewidth=0.5)
+        plt.xlabel("T = N accepted points")
+        plt.ylabel("d = Error threshold")
 
-    plt.title("Sample size = " + str(sample_size))
+        plt.title("Sample size = " + str(sample_size_grid[grid_pos]))
+    plt.show()
 
 
 def calculate_distance(matches):
@@ -64,12 +66,10 @@ class Experimentator:
                     accepted_points_results.append(error / times)
                 error_threshold_results.append(accepted_points_results)
 
-            if plot:
-                plot_heatmap(error_threshold_grid, error_threshold_results, grid_pos + 1,
-                             number_of_accepted_points_grid, sample_size)
-
             final_results.append(error_threshold_results)
 
         if plot:
-            plt.show()
+            plot_heat_map(error_threshold_grid, final_results, number_of_accepted_points_grid, sample_size_grid)
         return final_results
+
+
