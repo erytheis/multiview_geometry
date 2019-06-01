@@ -10,6 +10,9 @@ def plot_heatmap(error_threshold_grid, error_threshold_results, i, number_of_acc
                 vmin=np.min(error_threshold_results), vmax=np.max(error_threshold_results),
                 xticklabels=number_of_accepted_points_grid, yticklabels=np.round(error_threshold_grid, 2),
                 linewidth=0.5)
+    plt.xlabel("T = N accepted points")
+    plt.ylabel("d = Error threshold")
+
     plt.title("Sample size = " + str(sample_size))
 
 
