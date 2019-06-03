@@ -121,13 +121,13 @@ def build_A(matches):
 
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
-    sample_size = 6
+    sample_size = 9
     use_speed_up = True
-    outlier_proportion = 0.26
+    outlier_proportion = 0.6
     number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
     # number_of_iterations = 1000
-    error_threshold = 0.01
-    number_of_accepted_points = 75
+    error_threshold = 0.001
+    number_of_accepted_points = 90
 
     print "Expected number of iteration = " + str(number_of_iterations)
     return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points,

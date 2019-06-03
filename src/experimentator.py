@@ -39,11 +39,11 @@ class Experimentator:
         self.matches = matches
 
     def run_grid_search(self, error_type = "algebraic_distance", plot = True):
-        outlier_proportion = 0.2
+        outlier_proportion = 0.4
 
         # Define grid
         sample_size_grid = [8, 9, 10]
-        error_threshold_grid = np.linspace(0.01, 0.05, 10)
+        error_threshold_grid = np.linspace(0.002, 0.02, 10)
         number_of_accepted_points_grid = [50, 75, 100, 125, 150]
         times = 10
 
@@ -52,9 +52,10 @@ class Experimentator:
 
         for grid_pos, sample_size in enumerate(sample_size_grid):
             number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
+
             error_threshold_results = []
 
-            print "Started on " + str(grid_pos + 1) + " iteration of sample grid size..."
+            print "Started on " + str(grid_pos + 1) + " iteration of sample size "  + " ..."
             for error_threshold in error_threshold_grid:
                 accepted_points_results = []
                 for number_of_accepted_points in number_of_accepted_points_grid:
