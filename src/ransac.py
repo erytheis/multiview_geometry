@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.linalg import svd
 
-
 from src.helpers import add_ones_column
 
 
@@ -37,6 +36,8 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
     F_best = 0
     best_matches = 0
     found = False
+    sample = []
+    sample_idx = 0
 
     for i in range(num_of_iterations):
 
@@ -48,13 +49,10 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         F = fit_fundamental_matrix(sample)
 
         # Take the remaining after sampling
-        remaining_points = np.delete(matches, sample_idx, 0)
-
-        keypoints = add_ones_column(remaining_points[:, [0, 1]])
-        ground_truth = add_ones_column(remaining_points[:, [2, 3]])
+        remaining_matches = np.delete(matches, sample_idx, 0)
 
         # Compare the distance
-        error = calculate_error(keypoints, F, ground_truth, method= 'sampson')
+        error = calculate_error(remaining_matches, F, method = 'a_f')
 
         # Filter the points within the band width
         inliers_idx = np.where(error < error_threshold)[0]
@@ -78,17 +76,20 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
     return F_best, best_matches
 
 
-def calculate_error(x, F, x_p, method = 'sampson'):
+def calculate_error(matches, F, method = 'sampson'):
     err = 0
-    x = x.T
-    x_p = x_p.T
+    x = add_ones_column(matches[:, [0, 1]]).T
+    x_p = add_ones_column(matches[:, [2, 3]]).T
     if method == 'sampson':
         F1 = np.dot(F, x)
         F2 = np.dot(F, x_p)
         denom = F1[0] ** 2 + F1[1] ** 2 + F2[0] ** 2 + F2[1] ** 2
         err = (np.diag(np.dot(x.T, np.dot(F, x_p)))) ** 2 / denom
-    elif method == 'algebraic_distance':
-        err = np.dot(x.T, np.dot(F, x_p))
+    elif method == 'a_f':
+        A = build_A(matches)
+        err = abs(np.dot(A, F.reshape((9,1))))
+    elif method == 'euclidean':
+        err = np.sqrt(np.sum(((x - x_p) ** 2))) / len(matches)
     return err
 
 
@@ -120,13 +121,14 @@ def build_A(matches):
 
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
-    sample_size = 10
+    sample_size = 6
     use_speed_up = True
-    outlier_proportion = 0.2
-    # number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
-    number_of_iterations = 1000
-    error_threshold = 0.1
-    number_of_accepted_points = 100
+    outlier_proportion = 0.26
+    number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
+    # number_of_iterations = 1000
+    error_threshold = 0.01
+    number_of_accepted_points = 75
 
     print "Expected number of iteration = " + str(number_of_iterations)
-    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points, use_speed_up)
+    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points,
+                      use_speed_up)
