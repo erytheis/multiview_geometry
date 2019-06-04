@@ -29,6 +29,7 @@ def plot_error_distributions(errors):
     plt.ylim(ymax = np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
     plt.show()
 
+
 def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 300):
     """
     :param image1 and image2 must be RGB images
@@ -63,6 +64,7 @@ def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 300)
             matches_2.append([keypoints_2[idx][1], keypoints_2[idx][0]])
     return np.array(matches_1), np.array(matches_2)
 
+
 def get_matches_notre_dame():
     basewidth = 500
     I1 = Image.open('../description/data/NotreDame/NotreDame1.jpg')
@@ -87,10 +89,12 @@ def plot_data(data):
     y_values = data[:, 1]
     z_values = data[:, 2]
 
+    box_limit = 10
+
     fig = plt.figure()
     ax = Axes3D(fig)
-    ax.set_xlim(-500, 500)
-    ax.set_ylim(-500, 500)
-    ax.set_zlim(-500, 500)
+    ax.set_xlim(-box_limit, box_limit)
+    ax.set_ylim(-box_limit, box_limit)
+    ax.set_zlim(-box_limit, box_limit)
     ax.scatter(x_values, y_values, z_values)
     plt.show()
