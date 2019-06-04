@@ -39,7 +39,7 @@ class Experimentator:
         self.matches = matches
 
     def run_grid_search(self, error_type = "algebraic_distance", plot = True):
-        outlier_proportion = 0.4
+        outlier_proportion = 0.3
 
         # Define grid
         sample_size_grid = [8, 9, 10]
@@ -55,7 +55,7 @@ class Experimentator:
 
             error_threshold_results = []
 
-            print "Started on " + str(grid_pos + 1) + " iteration of sample size "  + " ..."
+            print "Started on " + str(grid_pos + 1) + " iteration of sample size " + " ..."
             for error_threshold in error_threshold_grid:
                 accepted_points_results = []
                 for number_of_accepted_points in number_of_accepted_points_grid:
@@ -67,7 +67,7 @@ class Experimentator:
 
                         F, best_matches = run_ransac(self.matches, number_of_iterations, sample_size, error_threshold,
                                                      number_of_accepted_points, speed_up = True)
-                        error += np.average( calculate_error(best_matches, F, method = error_type))
+                        error += np.average(calculate_error(best_matches, F, method = error_type))
 
 
                         number_of_accepted_points_history.append(len(best_matches))

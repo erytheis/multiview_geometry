@@ -71,6 +71,6 @@ def get_matches_notre_dame():
     wpercent = (basewidth / float(I2.size[0]))
     hsize = int((float(I2.size[1]) * float(wpercent)))
     I2 = I2.resize((basewidth, hsize), Image.ANTIALIAS)
-    matchpoints1, matchpoints2 = find_matching_points(I1, I2, n_levels = 3, distance_threshold = 200)
+    matchpoints1, matchpoints2 = find_matching_points(I1, I2, n_levels = 3, distance_threshold = 500)
     matches = np.hstack((matchpoints1, matchpoints2))
     return matches, I1, I2
