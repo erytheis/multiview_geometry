@@ -80,22 +80,23 @@ def get_matches_notre_dame():
     return matches, I1, I2
 
 
-def plot_data(*data):
+def plot_data(**data):
     """
     Plotting data point in 3-D
     :param data: 3-D data
     """
-    x_values = data[:, 0]
-    y_values = data[:, 1]
-    z_values = data[:, 2]
-
-    box_limit_max = np.max(data[:, :3])
-    box_limit_min = np.min(data[:, :3])
-
     fig = plt.figure()
     ax = Axes3D(fig)
+
+    box_limit_max = np.max([np.max(value) for value in data.values()])
+    box_limit_min = np.min([np.min(value) for value in data.values()])
+
     ax.set_xlim(box_limit_min, box_limit_max)
     ax.set_ylim(box_limit_min, box_limit_max)
     ax.set_zlim(box_limit_min, box_limit_max)
-    ax.scatter(x_values, y_values, z_values)
+    # ax.scatter(data[:, 0], data[:, 1], data[:, 2])
+
+    for key, points in data.items():
+        ax.scatter(points[:, 0], points[:, 1], points[:, 2], label=key)
+    plt.legend()
     plt.show()
