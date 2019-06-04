@@ -89,12 +89,13 @@ def plot_data(data):
     y_values = data[:, 1]
     z_values = data[:, 2]
 
-    box_limit = 10
+    box_limit_max = np.max(data[:, :3])
+    box_limit_min = np.min(data[:, :3])
 
     fig = plt.figure()
     ax = Axes3D(fig)
-    ax.set_xlim(-box_limit, box_limit)
-    ax.set_ylim(-box_limit, box_limit)
-    ax.set_zlim(-box_limit, box_limit)
+    ax.set_xlim(box_limit_min, box_limit_max)
+    ax.set_ylim(box_limit_min, box_limit_max)
+    ax.set_zlim(box_limit_min, box_limit_max)
     ax.scatter(x_values, y_values, z_values)
     plt.show()

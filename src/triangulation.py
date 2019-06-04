@@ -9,10 +9,21 @@ class Camera():
         self.camera_matrix = camera_matrix
 
 
+def load_data(data=0):
+    if data == 0:
+        data = "house"
+    else:
+        data = "library"
+
+    camera_matrix_1 = np.loadtxt('../description/data/' + data + '/' + data + '1_camera.txt')
+    camera_matrix_2 = np.loadtxt('../description/data/' + data + '/' + data + '2_camera.txt')
+    matches = np.loadtxt('../description/data/' + data + '/' + data + '_matches.txt')
+
+    return camera_matrix_1, camera_matrix_2, matches
+
+
 # Loading data
-camera_matrix_1 = np.loadtxt('../description/data/library/library1_camera.txt')
-camera_matrix_2 = np.loadtxt('../description/data/library/library2_camera.txt')
-matches = np.loadtxt('../description/data/library/library_matches.txt')
+camera_matrix_1, camera_matrix_2, matches = load_data(0)
 
 # Construct A matrix
 p1, p2, p3 = camera_matrix_1
