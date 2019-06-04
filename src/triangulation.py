@@ -22,18 +22,25 @@ def load_data(data=0):
     return camera_matrix_1, camera_matrix_2, matches
 
 
+def calculate_coordinates(camera_matrix_1, camera_matrix_2, matches):
+    p1, p2, p3 = camera_matrix_1
+    p1_p, p2_p, p3_p = camera_matrix_2
+
+    objects_coordinates = np.zeros((len(matches), 4))
+    for i in range(len(matches)):
+        A = np.multiply(matches[i].reshape((4, 1)), np.array([p3, p3, p3_p, p3_p])) - np.array([p1, p2, p1_p, p2_p])
+        U, D, V = svd(A)
+        object_coordinates = V[-1] / V[-1, -1]
+        objects_coordinates[i] = object_coordinates
+
+    return objects_coordinates
+
+
 # Loading data
 camera_matrix_1, camera_matrix_2, matches = load_data(0)
+coordinates = calculate_coordinates(camera_matrix_1, camera_matrix_2, matches)
+plot_data(np.array(coordinates))
 
-# Construct A matrix
-p1, p2, p3 = camera_matrix_1
-p1_p, p2_p, p3_p = camera_matrix_2
-
-objects_coordinates = np.zeros((len(matches), 4))
-for i in range(len(matches)):
-    A = np.multiply(matches[i].reshape((4, 1)), np.array([p3, p3, p3_p, p3_p])) - np.array([p1, p2, p1_p, p2_p])
-    U, D, V = svd(A)
-    object_coordinates = V[-1] / V[-1, -1]
-    objects_coordinates[i] = object_coordinates
-
-plot_data(np.array(objects_coordinates))
+camera_matrix_1, camera_matrix_2, matches = load_data(1)
+coordinates = calculate_coordinates(camera_matrix_1, camera_matrix_2, matches)
+plot_data(np.array(coordinates))
