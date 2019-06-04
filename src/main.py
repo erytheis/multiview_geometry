@@ -12,5 +12,3 @@ experimentator = Experimentator(matches)
 experimentator.run_grid_search("a_f")
 # experimentator.run_grid_search("euclidean")
 # experimentator.run_grid_search()
-
-# TODO 1)create experimentator class and calculate the error measure (A * F.reshape(9,1))

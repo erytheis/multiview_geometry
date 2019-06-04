@@ -31,40 +31,24 @@ def fit_fundamental_matrix(matches):
     return F
 
 
-def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points, speed_up):
-    max_number_of_inliers = 0
-    F_best = 0
-    best_matches = 0
-    found = False
-    sample = []
-    sample_idx = 0
+def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points):
+    max_number_of_inliers, F_best, best_matches = 0, 0, 0
+    sample_batch = matches
 
     for i in range(num_of_iterations):
 
         # Pick s points from mathces
-        if not found:
-            sample_idx = np.random.randint(0, matches.shape[0], sample_size)
-            sample = matches[sample_idx]
+        sample_idx = np.random.randint(0, sample_batch.shape[0], sample_size)
+        sample = sample_batch[sample_idx]
 
         F = fit_fundamental_matrix(sample)
 
-        # Take the remaining after sampling
-        # remaining_matches = np.delete(matches, sample_idx, 0)
-        remaining_matches = matches
         # Compare the distance
-        error = calculate_error(remaining_matches, F, method = 'sampson')
+        error = calculate_error(matches, F, method='sampson')
 
         # Filter the points within the band width
         inliers_idx = np.where(error < error_threshold)[0]
         inliers = matches[inliers_idx]
-
-        if speed_up and len(inliers) > num_of_accepted_points and found:
-            np.random.shuffle(inliers_idx)
-            sample_idx = inliers_idx[:sample_size]
-            sample = matches[sample_idx]
-            found = True
-        else:
-            found = False
 
         # Save the best model
         if len(inliers) > max_number_of_inliers:
@@ -72,11 +56,16 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
             F_best = F
             best_matches = inliers
 
+        # If the number of inliers is bigger than the number of accepted points then this is a good model,
+        # refit the model using all these inliers
+        if len(inliers) > num_of_accepted_points:
+            sample_batch = inliers
+
     # print "Number of inliers " + str(max_number_of_inliers)
     return F_best, best_matches
 
 
-def calculate_error(matches, F, method = 'sampson'):
+def calculate_error(matches, F, method='sampson'):
     err = 0
     x = add_ones_column(matches[:, [0, 1]]).T
     x_p = add_ones_column(matches[:, [2, 3]]).T
@@ -93,7 +82,7 @@ def calculate_error(matches, F, method = 'sampson'):
     return err
 
 
-def calculate_number_of_iterations(s, e, p = 0.99):
+def calculate_number_of_iterations(s, e, p=0.99):
     """
     Calculate minimum number of required samplings in order to achieve not contaminated set of points
     :param s: number of samples in one sampling
@@ -122,7 +111,6 @@ def build_A(matches):
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
     sample_size = 9
-    use_speed_up = True
     outlier_proportion = 0.7
     # number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
     number_of_iterations = 2000
@@ -130,5 +118,4 @@ def RANSAC_for_fundamental_matrix(matches):
     number_of_accepted_points = 100
 
     print "Expected number of iteration = " + str(number_of_iterations)
-    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points,
-                      use_speed_up)
+    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points)

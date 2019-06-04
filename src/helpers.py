@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from cyvlfeat import sift
-from scipy.spatial.distance import cdist
+import numpy as np
 from PIL import Image
+from cyvlfeat import sift
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.spatial.distance import cdist
 
 
 def add_ones_column(points):
@@ -23,14 +23,14 @@ def plot_error_distributions(errors):
     :param errors: vector of errors calculated in ransac
     :return:
     """
-    n, bins, patches = plt.hist(x = errors, bins = "auto", color = '#0504aa',
-                                alpha = 0.7, rwidth = 0.85)
+    n, bins, patches = plt.hist(x=errors, bins="auto", color='#0504aa',
+                                alpha=0.7, rwidth=0.85)
     maxfreq = n.max()
-    plt.ylim(ymax = np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
+    plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
     plt.show()
 
 
-def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 300):
+def find_matching_points(image1, image2, n_levels=3, distance_threshold=300):
     """
     :param image1 and image2 must be RGB images
     :param n_levels: number of scales
@@ -54,10 +54,10 @@ def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 300)
     AND each column of features is the descriptor of the corresponding frame in F.
     A descriptor is a 128-dimensional vector of class UINT8
     '''
-    keypoints_1, features_1 = sift.sift(image1, compute_descriptor = True, n_levels = n_levels)
-    keypoints_2, features_2 = sift.sift(image2, compute_descriptor = True, n_levels = n_levels)
+    keypoints_1, features_1 = sift.sift(image1, compute_descriptor=True, n_levels=n_levels)
+    keypoints_2, features_2 = sift.sift(image2, compute_descriptor=True, n_levels=n_levels)
     pairwise_dist = cdist(features_1, features_2)  # len(features_1) * len(features_2)
-    closest_1_to_2 = np.argmin(pairwise_dist, axis = 1)
+    closest_1_to_2 = np.argmin(pairwise_dist, axis=1)
     for i, idx in enumerate(closest_1_to_2):
         if pairwise_dist[i, idx] <= distance_threshold:
             matches_1.append([keypoints_1[i][1], keypoints_1[i][0]])
@@ -75,7 +75,7 @@ def get_matches_notre_dame():
     wpercent = (basewidth / float(I2.size[0]))
     hsize = int((float(I2.size[1]) * float(wpercent)))
     I2 = I2.resize((basewidth, hsize), Image.ANTIALIAS)
-    matchpoints1, matchpoints2 = find_matching_points(I1, I2, n_levels = 3, distance_threshold = 500)
+    matchpoints1, matchpoints2 = find_matching_points(I1, I2, n_levels=3, distance_threshold=500)
     matches = np.hstack((matchpoints1, matchpoints2))
     return matches, I1, I2
 
