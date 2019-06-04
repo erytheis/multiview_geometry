@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from cyvlfeat import sift
 from scipy.spatial.distance import cdist
 from PIL import Image
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def add_ones_column(points):
     """
@@ -74,3 +76,21 @@ def get_matches_notre_dame():
     matchpoints1, matchpoints2 = find_matching_points(I1, I2, n_levels = 3, distance_threshold = 500)
     matches = np.hstack((matchpoints1, matchpoints2))
     return matches, I1, I2
+
+
+def plot_data(data):
+    """
+    Plotting data point in 3-D
+    :param data: 3-D data
+    """
+    x_values = data[:, 0]
+    y_values = data[:, 1]
+    z_values = data[:, 2]
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.set_xlim(-500, 500)
+    ax.set_ylim(-500, 500)
+    ax.set_zlim(-500, 500)
+    ax.scatter(x_values, y_values, z_values)
+    plt.show()
