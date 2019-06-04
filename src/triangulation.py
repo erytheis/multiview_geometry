@@ -3,13 +3,7 @@ from numpy.linalg import svd
 from helpers import *
 
 
-class Camera():
-
-    def __init__(self, camera_matrix):
-        self.camera_matrix = camera_matrix
-
-
-def load_data(data=0):
+def load_data(data = 0):
     if data == 0:
         data = "house"
     else:
@@ -22,7 +16,7 @@ def load_data(data=0):
     return camera_matrix_1, camera_matrix_2, matches
 
 
-def calculate_coordinates(camera_matrix_1, camera_matrix_2, matches):
+def reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches):
     p1, p2, p3 = camera_matrix_1
     p1_p, p2_p, p3_p = camera_matrix_2
 
@@ -36,11 +30,15 @@ def calculate_coordinates(camera_matrix_1, camera_matrix_2, matches):
     return objects_coordinates
 
 
+def calculate_camera_center(camera_matrix):
+    U, D, V = svd(camera_matrix)
+    camera_center = V[-1] / V[-1, -1]
+    return camera_center
+
+
 # Loading data
 camera_matrix_1, camera_matrix_2, matches = load_data(0)
-coordinates = calculate_coordinates(camera_matrix_1, camera_matrix_2, matches)
-plot_data(np.array(coordinates))
-
-camera_matrix_1, camera_matrix_2, matches = load_data(1)
-coordinates = calculate_coordinates(camera_matrix_1, camera_matrix_2, matches)
-plot_data(np.array(coordinates))
+camera1_coordinates = calculate_camera_center(camera_matrix_1)
+camera2_coordinates = calculate_camera_center(camera_matrix_2)
+coordinates = reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches)
+plot_data(coordinates)
