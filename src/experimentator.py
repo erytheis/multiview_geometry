@@ -5,7 +5,6 @@ from src.helpers import plot_heat_map
 
 
 
-
 class Experimentator:
 
     def __init__(self, matches):

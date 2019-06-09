@@ -122,15 +122,3 @@ def build_A(matches):
         A[key] = np.array([x * x_p, x * y_p, x, x_p * y, y * y_p, y, x_p, y_p, 1])
     return A
 
-
-def RANSAC_for_fundamental_matrix(matches):
-    # Hyperparameters
-    sample_size = 10
-    outlier_proportion = 0.3
-    number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
-    # number_of_iterations = 2000
-    error_threshold = 0.08
-    number_of_accepted_points = 100
-
-    print "Expected number of iteration = " + str(number_of_iterations)
-    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points)

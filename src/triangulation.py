@@ -3,7 +3,12 @@ from numpy.linalg import svd
 from helpers import *
 
 
-def load_data(data=0):
+def load_data(data = 0):
+    """
+    Load pictures from the /data/
+    :param data: 0 - house photos, 1 - library
+    :return: pictures and corresponding matches
+    """
     if data == 0:
         data = "house"
     else:
@@ -17,6 +22,7 @@ def load_data(data=0):
 
 
 def reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches):
+    """ Reconstruct 3-D points from two pictures """
     p1, p2, p3 = camera_matrix_1
     p1_p, p2_p, p3_p = camera_matrix_2
 
@@ -36,11 +42,12 @@ def calculate_camera_center(camera_matrix):
     return camera_center
 
 
-# Loading data
+""" Main algorithm """
 for i in [0, 1]:
     camera_matrix_1, camera_matrix_2, matches, title = load_data(i)
     camera1_coordinates = calculate_camera_center(camera_matrix_1)
     camera2_coordinates = calculate_camera_center(camera_matrix_2)
     coordinates = reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches)
-    data_dict = {"Camera 1": np.array([camera1_coordinates]), "Camera 2": np.array([camera2_coordinates]), "Points": coordinates}
+    data_dict = {"Camera 1": np.array([camera1_coordinates]), "Camera 2": np.array([camera2_coordinates]),
+                 "Points": coordinates}
     plot_data(title, **data_dict)

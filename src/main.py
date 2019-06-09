@@ -1,6 +1,7 @@
 from experimentator import *
 from helpers import *
 
+
 # Load matches
 matches, _, __ = get_matches_notre_dame()
 
