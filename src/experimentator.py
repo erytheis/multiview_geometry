@@ -24,7 +24,7 @@ def plot_heat_map(axis, annot):
         plt.title(axis["sub_title"][grid_pos])
 
     plt.suptitle(axis['title'])
-    plt.show()
+    plt.figure()
 
 
 def calculate_distance(matches):
@@ -45,75 +45,97 @@ class Experimentator:
     def __init__(self, matches):
         self.matches = matches
 
+    def run_grid_search(self, error_type="sampson", plot=True):
+        """
+        Study the effect in the error of the error threshold and number of accepted points
+        for different samples sizes
 
-    def run_grid_search(self, error_type="algebraic_distance", plot=True):
+        """
+
         outlier_proportion = 0.3
 
         # Define grid
         sample_size_grid = [8, 9, 10]
-        error_threshold_grid = np.linspace(0.002, 0.2, 20)
-        number_of_accepted_points_grid = [50, 75, 100, 125, 150]
-        times = 20
+        error_threshold_grid = np.round(np.linspace(0.002, 1, 10), 3)
+        number_of_accepted_points_grid = [60, 80, 100, 120, 140, 160]
+        times = 10
 
-        final_results = []
+        final_results_errors = []
+        final_results_inliers = []
 
         for grid_pos, sample_size in enumerate(sample_size_grid):
             number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
             print "Started iteration {0} of {1}. Sample size is now {2}.".format(grid_pos + 1, len(sample_size_grid),
                                                                                  sample_size)
-            error_threshold_results = []
 
+            number_of_inliers = []
+            errors_res = []
             # print "Started on " + str(grid_pos + 1) + " iteration of sample size " + " ..."
-            for error_threshold in error_threshold_grid:
-                accepted_points_results, _ = self.run_accepted_points_search(error_threshold, error_type,
-                                                                             number_of_accepted_points_grid,
-                                                                             number_of_iterations, sample_size, times)
+            for number_of_accepted_points in number_of_accepted_points_grid:
+                errors = []
+                inliers = []
+                for error_threshold in error_threshold_grid:
+                    # Average the error after running the algorithm several times
+                    error, number_of_inliers_accepted = self.execute_ransac(error_threshold, error_type,
+                                                                                    number_of_accepted_points,
+                                                                                    number_of_iterations, sample_size,
+                                                                                    times)
 
-                error_threshold_results.append(accepted_points_results)
-                print "Error threshold " + str(error_threshold) + " finished"
+                    errors.append(error)
+                    inliers.append(number_of_inliers_accepted)
 
-            final_results.append(error_threshold_results)
+                number_of_inliers.append(inliers)
+                errors_res.append(errors)
+                print str(number_of_accepted_points) + " accepted points finished"
+
+            final_results_inliers.append(number_of_inliers)
+            final_results_errors.append(errors_res)
 
         if plot:
-            axis = {"x_label": "T = N accepted points",
-                    "y_label": "d = Error threshold",
-                    "x_tick_labels": number_of_accepted_points_grid,
-                    "y_tick_labels": error_threshold_grid,
+            axis = {"y_label": "T = Number of accepted points",
+                    "x_label": "d = Error threshold",
+                    "y_tick_labels": number_of_accepted_points_grid,
+                    "x_tick_labels": error_threshold_grid,
                     "sub_title": ["Sample size = " + str(sample_size) for sample_size in sample_size_grid],
                     "title": error_type + " error",
-                    "results": final_results}
+                    "results": np.array(final_results_errors)}
             plot_heat_map(axis, True)
             plot_heat_map(axis, False)
-        return final_results
 
+            axis = {"y_label": "T = Number of accepted points",
+                    "x_label": "d = Error threshold",
+                    "y_tick_labels": number_of_accepted_points_grid,
+                    "x_tick_labels": error_threshold_grid,
+                    "sub_title": ["Sample size = " + str(sample_size) for sample_size in sample_size_grid],
+                    "title": "Number of inliers",
+                    "results": np.array(final_results_inliers)}
+            plot_heat_map(axis, True)
+            plot_heat_map(axis, False)
+            plt.show()
 
-    def run_accepted_points_search(self, error_threshold, error_type, number_of_accepted_points_grid,
-                                   number_of_iterations, sample_size, times, use_T=True):
-        errors = []
-        number_of_accepted_matches = []
-        for number_of_accepted_points in number_of_accepted_points_grid:
-            # Average the error after running the algorithm several times
-            error = 0
-            number_of_accepted_matches_history = []
+    def execute_ransac(self, error_threshold, error_type, number_of_accepted_points, number_of_iterations, sample_size,
+                       times):
+        """ Execute ransac 'times' times and return the average of the result """
+        error = 0
+        number_of_accepted_matches_history = []
+        for i in range(times):
+            F, best_matches = run_ransac(self.matches, number_of_iterations, sample_size, error_threshold,
+                                         number_of_accepted_points, True)
+            error += np.average(calculate_error(best_matches, F, method=error_type))
 
-            for i in range(times):
-                F, best_matches = run_ransac(self.matches, number_of_iterations, sample_size, error_threshold,
-                                             number_of_accepted_points, use_T)
-                error += np.average(calculate_error(best_matches, F, method=error_type))
+            number_of_accepted_matches_history.append(len(best_matches))
+        return np.average(error), int(np.average(number_of_accepted_matches_history))
 
-                number_of_accepted_matches_history.append(len(best_matches))
+    def study_inliers_search(self):
+        """
+        Study the effect in the number of inliers that the outlier proportion and error threshold have
+        for different sample sizes
+        """
 
-            errors.append(error / times)
-            number_of_accepted_matches.append(int(np.average(number_of_accepted_matches_history)))
-
-        return errors, number_of_accepted_matches
-
-
-    def study_accepted_points_search(self):
         sample_size_grid = [8, 9, 10]
-        outlier_proportion_grid = np.round(np.linspace(0.1, 0.7, 6), 2)
+        outlier_proportion_grid = np.round(np.linspace(0.1, 0.5, 6), 2)
         error_threshold_grid = np.round(np.linspace(0.002, 1, 10), 4)
-        number_of_accepted_points_grid = [100]
+        number_of_accepted_points = 100
         times = 10
 
         error_type = "a_f"
@@ -132,11 +154,9 @@ class Experimentator:
                 error_threshold_results = []
 
                 for error_threshold in error_threshold_grid:
-                    errors, number_of_accepted_matches = self.run_accepted_points_search(error_threshold, error_type,
-                                                                                         number_of_accepted_points_grid,
-                                                                                         number_of_iterations,
-                                                                                         sample_size,
-                                                                                         times, False)
+                    errors, number_of_accepted_matches = self.execute_ransac(error_threshold, error_type,
+                                                                             number_of_accepted_points,
+                                                                             number_of_iterations, sample_size, times)
                     error_threshold_results.append(number_of_accepted_matches[0])
 
                 outliers_results.append(error_threshold_results)
@@ -151,42 +171,4 @@ class Experimentator:
                 "results": final_results}
         plot_heat_map(axis, True)
         plot_heat_map(axis, False)
-
-        pass
-
-        # plt.plot(number_of_accepted_matches, label="Using T")
-        # plt.plot(number_of_accepted_matches_no_T, label="Not using T")
-        # plt.xlabel("T")
-        # plt.ylabel("Number of accepted matches")
-        # plt.legend()
-        # plt.figure()
-        #
-        # plt.plot(errors, label="Using T")
-        # plt.plot(errors_no_T, label="Not using T")
-        # plt.xlabel("T")
-        # plt.ylabel("Error")
-        # plt.legend()
-        # plt.show()
-
-        # fig, ax1 = plt.subplots()
-        #
-        # color = 'tab:red'
-        # ax1.set_xlabel('T, number of accepted points')
-        # ax1.set_ylabel('Number of accepted matches', color=color)
-        # ax1.plot(number_of_accepted_matches, label="Using T")
-        # ax1.plot(number_of_accepted_matches_no_T, color=color, label="Not using T")
-        # ax1.tick_params(axis='y', labelcolor=color)
-        # plt.legend()
-        #
-        # ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-        #
-        # color = 'tab:blue'
-        # ax2.set_ylabel('Error', color=color)  # we already handled the x-label with ax1
-        # ax2.plot(errors, color=color, label="Using T")
-        # ax2.plot(errors_no_T, color=color, label="Not using T")
-        # ax2.tick_params(axis='y', labelcolor=color)
-        #
-        # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        # plt.legend()
-        # plt.title("Effect of T in RANSAC performance")
-        # plt.show()
+        plt.show()

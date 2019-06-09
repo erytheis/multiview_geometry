@@ -3,10 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import copy
-
-
-def fit_fundamental_matrix(matches):
-    print("Fitting of the fundamental Matrix takes place here!!!")
+from src.ransac import fit_fundamental_matrix
 
 
 if __name__ == '__main__':

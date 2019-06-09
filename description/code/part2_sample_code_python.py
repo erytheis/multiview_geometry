@@ -10,7 +10,7 @@ from scipy.spatial.distance import cdist
 from src.ransac import RANSAC_for_fundamental_matrix
 
 
-def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 300):
+def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 150):
     """
     :param image1 and image2 must be RGB images
     :param n_levels: number of scales
