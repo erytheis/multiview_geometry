@@ -1,43 +1,9 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from ransac import *
+from src.helpers import plot_heat_map
 
 
-def plot_heat_map(axis, annot):
-    """
-    Plot heat map with the parameters sent
-    :param axis: dictionary with the information for the labels. keys are:
-                    x_tick_labels, y_tick_labels, x_label, y_label, results, title
-    :param annot: flag to show the heat map annotated or not
-    :return:
-    """
-    final_results = axis['results']
-    for grid_pos, result in enumerate(final_results):
-        plt.subplot(1, 3, grid_pos + 1)
-        sns.heatmap(result,
-                    vmin=np.min(final_results), vmax=np.max(final_results),
-                    xticklabels=axis['x_tick_labels'], yticklabels=np.round(axis['y_tick_labels'], 4),
-                    linewidth=0.5, annot=annot)
-        plt.xlabel(axis['x_label'])
-        plt.ylabel(axis['y_label'])
-        plt.title(axis["sub_title"][grid_pos])
-
-    plt.suptitle(axis['title'])
-    plt.figure()
-
-
-def calculate_distance(matches):
-    points_1 = matches[:, [0, 1]]
-    points_2 = matches[:, [2, 3]]
-    error = np.sqrt(np.sum(((points_1 - points_2) ** 2))) / len(matches)
-    return error
-
-
-# def calculate_error_helper(matches, F):
-#     keypoints = add_ones_column(matches[:, [0, 1]])
-#     ground_truth = add_ones_column(matches[:, [2, 3]])
-#     return np.sum(calculate_error(keypoints, F, ground_truth, method='sampson')) / len(matches)
 
 
 class Experimentator:

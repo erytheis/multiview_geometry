@@ -1,10 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from PIL import Image
 from cyvlfeat import sift
+from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.distance import cdist
 from scipy.interpolate import griddata
+
+from src.ransac import np
 
 
 def add_ones_column(points):
@@ -135,3 +139,26 @@ def plot_data_interpolated(title, method = 'linear', **data):
 
     plt.title(title)
     plt.show()
+
+
+def plot_heat_map(axis, annot):
+    """
+    Plot heat map with the parameters sent
+    :param axis: dictionary with the information for the labels. keys are:
+                    x_tick_labels, y_tick_labels, x_label, y_label, results, title
+    :param annot: flag to show the heat map annotated or not
+    :return:
+    """
+    final_results = axis['results']
+    for grid_pos, result in enumerate(final_results):
+        plt.subplot(1, 3, grid_pos + 1)
+        sns.heatmap(result,
+                    vmin=np.min(final_results), vmax=np.max(final_results),
+                    xticklabels=axis['x_tick_labels'], yticklabels=np.round(axis['y_tick_labels'], 4),
+                    linewidth=0.5, annot=annot)
+        plt.xlabel(axis['x_label'])
+        plt.ylabel(axis['y_label'])
+        plt.title(axis["sub_title"][grid_pos])
+
+    plt.suptitle(axis['title'])
+    plt.figure()
