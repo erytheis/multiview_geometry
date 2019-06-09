@@ -13,7 +13,7 @@ def load_data(data=0):
     camera_matrix_2 = np.loadtxt('../description/data/' + data + '/' + data + '2_camera.txt')
     matches = np.loadtxt('../description/data/' + data + '/' + data + '_matches.txt')
 
-    return camera_matrix_1, camera_matrix_2, matches
+    return camera_matrix_1, camera_matrix_2, matches, data
 
 
 def reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches):
@@ -37,9 +37,10 @@ def calculate_camera_center(camera_matrix):
 
 
 # Loading data
-camera_matrix_1, camera_matrix_2, matches = load_data(1)
-camera1_coordinates = calculate_camera_center(camera_matrix_1)
-camera2_coordinates = calculate_camera_center(camera_matrix_2)
-coordinates = reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches)
-data_dict = {"Camera 1": np.array([camera1_coordinates]), "Camera 2": np.array([camera2_coordinates]), "Points": coordinates}
-plot_data(**data_dict)
+for i in [0, 1]:
+    camera_matrix_1, camera_matrix_2, matches, title = load_data(i)
+    camera1_coordinates = calculate_camera_center(camera_matrix_1)
+    camera2_coordinates = calculate_camera_center(camera_matrix_2)
+    coordinates = reconstruct_3d_points(camera_matrix_1, camera_matrix_2, matches)
+    data_dict = {"Camera 1": np.array([camera1_coordinates]), "Camera 2": np.array([camera2_coordinates]), "Points": coordinates}
+    plot_data(title, **data_dict)

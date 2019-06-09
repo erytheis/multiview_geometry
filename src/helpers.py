@@ -80,7 +80,7 @@ def get_matches_notre_dame():
     return matches, I1, I2
 
 
-def plot_data(**data):
+def plot_data(title="", **data):
     """
     Plotting data point in 3-D
     :param data: 3-D data
@@ -97,6 +97,7 @@ def plot_data(**data):
     # ax.scatter(data[:, 0], data[:, 1], data[:, 2])
 
     for key, points in data.items():
-        ax.scatter(points[:, 0], points[:, 1], points[:, 2], label=key)
+        ax.scatter(points[:, 0], points[:, 1], points[:, 2], label=key, s=[5 if key == "Points" else 20])
     plt.legend()
+    plt.title(title)
     plt.show()
