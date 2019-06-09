@@ -53,7 +53,7 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         F = fit_fundamental_matrix(sample)
 
         # Compare the distance
-        error = calculate_error(matches, F, method = 'sampson')
+        error = calculate_error(matches, F, method = 'a_f')
 
         # Filter the points within the band width
         inliers_idx = np.where(error < error_threshold)[0]
@@ -91,7 +91,7 @@ def calculate_error(matches, F, method = 'a_f'):
         denom = F1[0] ** 2 + F1[1] ** 2 + F2[0] ** 2 + F2[1] ** 2
         err = (np.diag(np.dot(x.T, np.dot(F, x_p)))) ** 2 / denom
     elif method == 'a_f':
-        err = np.dot(x.T, np.dot(F, x_p))
+        err = np.abs(np.diag(np.dot(x.T, np.dot(F, x_p))))
     elif method == 'euclidean':
         err = np.sqrt(np.sum(((x - x_p) ** 2))) / len(matches)
     return err
@@ -129,7 +129,7 @@ def RANSAC_for_fundamental_matrix(matches):
     outlier_proportion = 0.6
     number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
     # number_of_iterations = 2000
-    error_threshold = 0.8
+    error_threshold = 0.06
     number_of_accepted_points = 100
 
     print "Expected number of iteration = " + str(number_of_iterations)
