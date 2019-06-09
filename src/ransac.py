@@ -31,7 +31,7 @@ def fit_fundamental_matrix(matches):
     return F
 
 
-def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points):
+def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_accepted_points, use_T=True):
     max_number_of_inliers, F_best, best_matches = 0, 0, 0
     sample_batch = matches
 
@@ -58,7 +58,7 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
 
         # If the number of inliers is bigger than the number of accepted points then this is a good model,
         # refit the model using all these inliers
-        if len(inliers) > num_of_accepted_points:
+        if use_T and len(inliers) > num_of_accepted_points:
             sample_batch = inliers
 
     # print "Number of inliers " + str(max_number_of_inliers)
@@ -111,10 +111,10 @@ def build_A(matches):
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
     sample_size = 9
-    outlier_proportion = 0.7
-    # number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
-    number_of_iterations = 2000
-    error_threshold = 0.09
+    outlier_proportion = 0.6
+    number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
+    # number_of_iterations = 2000
+    error_threshold = 1
     number_of_accepted_points = 100
 
     print "Expected number of iteration = " + str(number_of_iterations)
