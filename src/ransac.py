@@ -53,7 +53,7 @@ def run_ransac(matches, num_of_iterations, sample_size, error_threshold, num_of_
         F = fit_fundamental_matrix(sample)
 
         # Compare the distance
-        error = calculate_error(matches, F, method = 'a_f')
+        error = calculate_error(matches, F, method = 'sampson')
 
         # Filter the points within the band width
         inliers_idx = np.where(error < error_threshold)[0]
@@ -126,10 +126,10 @@ def build_A(matches):
 def RANSAC_for_fundamental_matrix(matches):
     # Hyperparameters
     sample_size = 10
-    outlier_proportion = 0.6
+    outlier_proportion = 0.3
     number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
     # number_of_iterations = 2000
-    error_threshold = 0.06
+    error_threshold = 0.08
     number_of_accepted_points = 100
 
     print "Expected number of iteration = " + str(number_of_iterations)
