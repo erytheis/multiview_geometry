@@ -5,7 +5,6 @@ import matplotlib.cm as cm
 import copy
 from src.ransac import fit_fundamental_matrix
 
-
 if __name__ == '__main__':
 
     # load images and match files for the first example
@@ -32,7 +31,7 @@ if __name__ == '__main__':
     ax.set_aspect('equal')
     ax.imshow(I3)
     colors = iter(cm.rainbow(np.linspace(0, 1, matches_to_plot.shape[0])))
-    [plt.plot([m[0], m[2]], [m[1], m[3]], color=next(colors)) for m in matches_to_plot]
+    [plt.plot([m[0], m[2]], [m[1], m[3]], color = next(colors)) for m in matches_to_plot]
     plt.show()
 
     # first, fit fundamental matrix to the matches
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     # find points on epipolar lines L closest to matches(:,3:4)
     l = np.sqrt(L1[:, 0] ** 2 + L1[:, 1] ** 2)
     L = np.divide(L1, np.kron(np.ones((3, 1)), l).transpose())  # rescale the line
-    pt_line_dist = np.multiply(L, np.c_[matches[:, 2:4], np.ones((N, 1))]).sum(axis=1)
+    pt_line_dist = np.multiply(L, np.c_[matches[:, 2:4], np.ones((N, 1))]).sum(axis = 1)
     closest_pt = matches[:, 2:4] - np.multiply(L[:, 0:2], np.kron(np.ones((2, 1)), pt_line_dist).transpose())
 
     # find endpoints of segment on epipolar line (for display purposes)
