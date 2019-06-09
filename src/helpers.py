@@ -104,7 +104,7 @@ def plot_data(title="", **data):
     plt.show()
 
 
-def plot_data_interpolated(title, method = 'cubic', **data):
+def plot_data_interpolated(title, method = 'linear', **data):
     """
     Interpolates the points in 3-d to create a mesh
     :param data: (M-D) dataset

@@ -45,6 +45,7 @@ class Experimentator:
     def __init__(self, matches):
         self.matches = matches
 
+
     def run_grid_search(self, error_type="algebraic_distance", plot=True):
         outlier_proportion = 0.3
 
@@ -85,6 +86,7 @@ class Experimentator:
             plot_heat_map(axis, False)
         return final_results
 
+
     def run_accepted_points_search(self, error_threshold, error_type, number_of_accepted_points_grid,
                                    number_of_iterations, sample_size, times, use_T=True):
         errors = []
@@ -105,6 +107,7 @@ class Experimentator:
             number_of_accepted_matches.append(int(np.average(number_of_accepted_matches_history)))
 
         return errors, number_of_accepted_matches
+
 
     def study_accepted_points_search(self):
         sample_size_grid = [8, 9, 10]
