@@ -1,16 +1,34 @@
-import copy
-
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-import numpy as np
 from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
 from cyvlfeat import sift
 from scipy.spatial.distance import cdist
+import matplotlib.cm as cm
+import copy
 
-from src.ransac import RANSAC_for_fundamental_matrix
+from src.ransac import calculate_number_of_iterations, run_ransac
 
 
-def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 150):
+def RANSAC_for_fundamental_matrix(matches):
+    """
+    Run RANSAC with the set number of parameters
+    :param matches: (m x 4) array matches
+    :return: filtered out array of matches
+    """
+    # Hyperparameters
+    sample_size = 10
+    outlier_proportion = 0.6
+    number_of_iterations = calculate_number_of_iterations(sample_size, outlier_proportion)
+    # number_of_iterations = 2000
+    error_threshold = 0.08
+    number_of_accepted_points = 80
+
+    print "Expected number of iteration = " + str(number_of_iterations)
+    return run_ransac(matches, number_of_iterations, sample_size, error_threshold, number_of_accepted_points)
+
+
+
+def find_matching_points(image1, image2, n_levels=3, distance_threshold=300):
     """
     :param image1 and image2 must be RGB images
     :param n_levels: number of scales
@@ -34,32 +52,16 @@ def find_matching_points(image1, image2, n_levels = 3, distance_threshold = 150)
     AND each column of features is the descriptor of the corresponding frame in F.
     A descriptor is a 128-dimensional vector of class UINT8
     '''
-    keypoints_1, features_1 = sift.sift(image1, compute_descriptor = True, n_levels = n_levels)
-    keypoints_2, features_2 = sift.sift(image2, compute_descriptor = True, n_levels = n_levels)
+    keypoints_1, features_1 = sift.sift(image1, compute_descriptor=True, n_levels=n_levels)
+    keypoints_2, features_2 = sift.sift(image2, compute_descriptor=True, n_levels=n_levels)
     pairwise_dist = cdist(features_1, features_2)  # len(features_1) * len(features_2)
-    closest_1_to_2 = np.argmin(pairwise_dist, axis = 1)
+    closest_1_to_2 = np.argmin(pairwise_dist, axis=1)
     for i, idx in enumerate(closest_1_to_2):
         if pairwise_dist[i, idx] <= distance_threshold:
             matches_1.append([keypoints_1[i][1], keypoints_1[i][0]])
             matches_2.append([keypoints_2[idx][1], keypoints_2[idx][0]])
     return np.array(matches_1), np.array(matches_2)
 
-
-# def RANSAC_for_fundamental_matrix(matches):  # this is a function that you should write
-#     print('Implementation of RANSAC to to find the best fundamental matrix takes place here')
-
-
-def plot_two_picture_correspondence(matches_to_plot):
-    global colors
-    fig, ax = plt.subplots()
-    I3 = np.zeros((I1.size[1], I1.size[0] * 2, 3))
-    I3[:, :I1.size[0], :] = I1
-    I3[:, I1.size[0]:, :] = I2
-    matches_to_plot[:, 2] += I2.size[0]  # add to the x-coordinate of second image
-    ax.set_aspect('equal')
-    ax.imshow(np.array(I3).astype(float))
-    colors = iter(cm.rainbow(np.linspace(0, 1, matches_to_plot.shape[0])))
-    [plt.plot([m[0], m[2]], [m[1], m[3]], color = next(colors)) for m in matches_to_plot]
 
 
 if __name__ == '__main__':
@@ -86,11 +88,22 @@ if __name__ == '__main__':
     this code is to help you visualize the matches, you don't need to use it to produce the results for the assignment
     '''
 
-    plot_two_picture_correspondence(matches_to_plot)
+    I3 = np.zeros((I1.size[1], I1.size[0] * 2, 3))
+    I3[:, :I1.size[0], :] = I1
+    I3[:, I1.size[0]:, :] = I2
+    fig, ax = plt.subplots()
+    matches_to_plot[:, 2] += I2.size[0]  # add to the x-coordinate of second image
+    ax.set_aspect('equal')
+    ax.imshow(np.array(I3).astype(float))
+    colors = iter(cm.rainbow(np.linspace(0, 1, matches_to_plot.shape[0])))
+
+    [plt.plot([m[0], m[2]], [m[1], m[3]], color=next(colors)) for m in matches_to_plot]
+    plt.show()
 
     # first, find the fundamental matrix to on the unreliable matches using RANSAC
     [F, best_matches] = RANSAC_for_fundamental_matrix(matches)  # this is a function that you should write
     N = len(best_matches)
+
     '''
     display second image with epipolar lines reprojected from the first image
     '''
@@ -98,12 +111,10 @@ if __name__ == '__main__':
     L1 = np.matmul(F, M).transpose()  # transform points from
     # the first image to get epipolar lines in the second image
 
-    plot_two_picture_correspondence(best_matches)
-
     # find points on epipolar lines L closest to matches(:,3:4)
     l = np.sqrt(L1[:, 0] ** 2 + L1[:, 1] ** 2)
     L = np.divide(L1, np.kron(np.ones((3, 1)), l).transpose())  # rescale the line
-    pt_line_dist = np.multiply(L, np.c_[best_matches[:, 2:4], np.ones((N, 1))]).sum(axis = 1)
+    pt_line_dist = np.multiply(L, np.c_[best_matches[:, 2:4], np.ones((N, 1))]).sum(axis=1)
     closest_pt = best_matches[:, 2:4] - np.multiply(L[:, 0:2], np.kron(np.ones((2, 1)), pt_line_dist).transpose())
 
     # find endpoints of segment on epipolar line (for display purposes)
@@ -114,11 +125,12 @@ if __name__ == '__main__':
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
     ax.imshow(I2)
-    ax.plot(best_matches[:, 2], best_matches[:, 3], '+r', label = "correspondance on the other image")
+    ax.plot(best_matches[:, 2], best_matches[:, 3], '+r')
     ax.plot([best_matches[:, 2], closest_pt[:, 0]], [best_matches[:, 3], closest_pt[:, 1]], 'r')
     ax.plot([pt1[:, 0], pt2[:, 0]], [pt1[:, 1], pt2[:, 1]], 'g')
-    plt.legend()
     plt.show()
+
+
 
     ## optional, re-estimate the fundamental matrix using the best matches, similar to part1
     # F = fit_fundamental_matrix(best_matches); # this is a function that you wrote for part1
