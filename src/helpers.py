@@ -104,22 +104,34 @@ def plot_data(title="", **data):
     plt.show()
 
 
-def plot_data_interpolated(data, method = 'linear'):
+def plot_data_interpolated(title, method = 'cubic', **data):
+    """
+    Interpolates the points in 3-d to create a mesh
+    :param data: (M-D) dataset
+    :param method: {"linear", nearest, "cubic"}
+    """
     fig = plt.figure()
     ax = Axes3D(fig)
 
-    box_limit_max = np.max(data[:, 0:1])
-    box_limit_min = np.min(data[:, 0:1])
-    step = (box_limit_max - box_limit_min) / 100
+    # box_limit_max = np.max(data[:, 0:1])
+    # box_limit_min = np.min(data[:, 0:1])
 
-    points = np.array([data[:, 0], data[:, 1]]).T
-    values = data[:, 2]
+    box_limit_max = np.max([np.max(value) for value in data.values()])
+    box_limit_min = np.min([np.min(value) for value in data.values()])
 
+    points = np.array([data["Points"][:, 0], data["Points"][:, 1]]).T
+    values = data["Points"][:, 2]
     grid_x, grid_y = np.mgrid[box_limit_min:box_limit_max:100j, box_limit_min:box_limit_max:100j]
-
-    print
     Z = griddata(points, values, (grid_x, grid_y), method = method)
-    Z_t = Z.T
-    ax.plot_surface(grid_x, grid_y, Z, alpha = 0.25, color = "w")
 
+    ax.set_xlim(box_limit_min, box_limit_max)
+    ax.set_ylim(box_limit_min, box_limit_max)
+    ax.set_zlim(box_limit_min, box_limit_max)
+
+
+    for key, points in data.items():
+        ax.scatter(points[:, 0], points[:, 1], points[:, 2], label=key, s=[5 if key == "Points" else 20])
+    ax.plot_surface(grid_x, grid_y, Z, alpha = 0.25, color = "g")
+
+    plt.title(title)
     plt.show()
