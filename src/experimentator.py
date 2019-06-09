@@ -56,8 +56,8 @@ class Experimentator:
 
         # Define grid
         sample_size_grid = [8, 9, 10]
-        error_threshold_grid = np.round(np.linspace(0.002, 1, 10), 3)
-        number_of_accepted_points_grid = [60, 80, 100, 120, 140, 160]
+        error_threshold_grid = np.round(np.linspace(0.002, 0.2, 10), 3)
+        number_of_accepted_points_grid = [80, 100, 120, 140, 160, 180]
         times = 10
 
         final_results_errors = []
@@ -77,9 +77,9 @@ class Experimentator:
                 for error_threshold in error_threshold_grid:
                     # Average the error after running the algorithm several times
                     error, number_of_inliers_accepted = self.execute_ransac(error_threshold, error_type,
-                                                                                    number_of_accepted_points,
-                                                                                    number_of_iterations, sample_size,
-                                                                                    times)
+                                                                            number_of_accepted_points,
+                                                                            number_of_iterations, sample_size,
+                                                                            times)
 
                     errors.append(error)
                     inliers.append(number_of_inliers_accepted)
@@ -99,17 +99,12 @@ class Experimentator:
                     "sub_title": ["Sample size = " + str(sample_size) for sample_size in sample_size_grid],
                     "title": error_type + " error",
                     "results": np.array(final_results_errors)}
-            plot_heat_map(axis, True)
+            # plot_heat_map(axis, True)
             plot_heat_map(axis, False)
 
-            axis = {"y_label": "T = Number of accepted points",
-                    "x_label": "d = Error threshold",
-                    "y_tick_labels": number_of_accepted_points_grid,
-                    "x_tick_labels": error_threshold_grid,
-                    "sub_title": ["Sample size = " + str(sample_size) for sample_size in sample_size_grid],
-                    "title": "Number of inliers",
-                    "results": np.array(final_results_inliers)}
-            plot_heat_map(axis, True)
+            axis["title"] = "Number of inliers"
+            axis["results"] = np.array(final_results_inliers)
+            # plot_heat_map(axis, True)
             plot_heat_map(axis, False)
             plt.show()
 
@@ -120,7 +115,7 @@ class Experimentator:
         number_of_accepted_matches_history = []
         for i in range(times):
             F, best_matches = run_ransac(self.matches, number_of_iterations, sample_size, error_threshold,
-                                         number_of_accepted_points, True)
+                                         number_of_accepted_points)
             error += np.average(calculate_error(best_matches, F, method=error_type))
 
             number_of_accepted_matches_history.append(len(best_matches))
